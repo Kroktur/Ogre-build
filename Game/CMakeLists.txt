@@ -40,16 +40,40 @@ if( MSVC )
 	add_definitions( -DUNICODE -D_UNICODE )
 endif()
 
-include_directories( "./include" )
-# Ogre doesn't need this include, but we do because of Rapidjson in UnitTesting.cpp
-include_directories( "./Dependencies/Ogre/Dependencies/include" )
+#lib header
 include_directories( "${SDL2_INCLUDE_DIR}" )
 
+#set variable
+set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-add_recursive( ./src SOURCES )
-add_recursive( ./include HEADERS )
+# Récupération automatique des fichiers
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
+    "${HEADER_DIR}/*.h"
+    "${HEADER_DIR}/*.hpp"
+)
 
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+    "${SOURCE_DIR}/*.cpp"
+    "${SOURCE_DIR}/*.c"
+)
+
+source_group(
+    TREE ${HEADER_DIR}
+    PREFIX "Header Files"
+    FILES ${HEADERS}
+)
+
+source_group(
+    TREE ${SOURCE_DIR}
+    PREFIX "Source Files"
+    FILES ${SOURCES}
+)
+
+# add executable
 add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${HEADER_DIR})
 
 target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
 target_link_libraries(${PROJECT_NAME} "${SDL2_LIBRARY}" "${SDL2MAIN_LIBRARY}")
