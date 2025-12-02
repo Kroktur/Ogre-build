@@ -10,25 +10,44 @@
 
 #set( CMAKE_TOOLCHAIN_FILE CMake/iOS.cmake )
 
+#Set Ogre Variables
 set(OGRE_SOURCE $ENV{OGRE_SOURCE})
 set(OGRE_BINARIES $ENV{OGRE_BINARIES})
 set(OGRE_LIBRARIES $ENV{OGRE_LIBRARIES})
+#Set Ogre Variables
 
+#Set SDl Variable
 set(SDL2_DIR "${CMAKE_SOURCE_DIR}/../SDL2")
 set(SDL2_INCLUDE_DIR  "${SDL2_DIR}/include")
 set(SDL2_LIBRARY      "${SDL2_DIR}/lib/x64/SDL2.lib")
 set(SDL2MAIN_LIBRARY  "${SDL2_DIR}/lib/x64/SDL2main.lib")
+#Set SDl Variable
+
+#Set Other Variables
+set(VCPKG_ROOT $ENV{VCPKG_ROOT_DIR})
+#Set Other Variables
+
+# GlobalHeaderFile
+set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+# GlobalHeaderFile
+
+#bin path
+set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}" )
+#bin path
+
 
 cmake_minimum_required( VERSION 3.5.1 )
 project( Game )
 
-set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}" )
-
+#vcpkg
+include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+#vcpkg
+#Ogre
 include( CMake/Bootstrap.cmake )
 include( CMake/Dependencies/OGRE.cmake )
-
 setupOgre( OGRE_SOURCE, OGRE_BINARIES, OGRE_LIBRARIES, FALSE, FALSE )
-
+#Ogre
 
 # Setup our application
 set( EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}" )
@@ -39,13 +58,11 @@ if( MSVC )
 	endif()
 	add_definitions( -DUNICODE -D_UNICODE )
 endif()
+# Setup our application
 
 #lib header
 include_directories( "${SDL2_INCLUDE_DIR}" )
-
-#set variable
-set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+#lib header
 
 # Récupération automatique des fichiers
 file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
@@ -69,22 +86,34 @@ source_group(
     PREFIX "Source Files"
     FILES ${SOURCES}
 )
+# Récupération automatique des fichiers
+
+#Package
+#Package
 
 # add executable
 add_executable( ${PROJECT_NAME} WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${RESOURCES} )
 
+#TargetInclude
 target_include_directories(${PROJECT_NAME} PUBLIC ${HEADER_DIR})
+#TargetInclude
 
+#TargetLib
 target_link_libraries( ${PROJECT_NAME} ${OGRE_LIBRARIES} )
 target_link_libraries(${PROJECT_NAME} "${SDL2_LIBRARY}" "${SDL2MAIN_LIBRARY}")
+#TargetLib
 
+#Copy Dll
 file(COPY "${CMAKE_SOURCE_DIR}/../SDL2/lib/x64/SDL2.dll"
      DESTINATION "${EXECUTABLE_OUTPUT_PATH}/Debug")
 file(COPY "${CMAKE_SOURCE_DIR}/../SDL2/lib/x64/SDL2.dll"
      DESTINATION "${EXECUTABLE_OUTPUT_PATH}/Release")
+#Copy Dll
 
-
-	 # Définit le répertoire de travail pour le débogueur Visual Studio
+# Définit le répertoire de travail pour le débogueur Visual Studio
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${EXECUTABLE_OUTPUT_PATH}/Debug"
+    VS_DEBUGGER_WORKING_DIRECTORY 
+        "$<IF:$<CONFIG:Debug>,${EXECUTABLE_OUTPUT_PATH}/Debug,${EXECUTABLE_OUTPUT_PATH}/Release>"
 )
+
+# Définit le répertoire de travail pour le débogueur Visual Studio
