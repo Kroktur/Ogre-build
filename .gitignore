@@ -1,0 +1,6 @@
+vcpkg/*
+Ogre/*
+Game/bin/*
+Game/Build/*
+Game/include/OgreCommon/*
+Game/srs/OgreCommon/*
